@@ -1,9 +1,13 @@
 import Express from "express";
-import { authMiddleware } from "../../middleware/auth.middleware";
-import { getProfile } from "./profile.controllers";
+import { authMiddleware } from "../../middlewares/auth.middleware";
+import { ProfileController } from "./profile.controler";
+import { upload } from "../../middlewares/multer.middleware";
 
 const profileRouter = Express.Router();
+const profile = ProfileController();
 
-profileRouter.get("/" , authMiddleware , getProfile)
-
-export default profileRouter
+profileRouter.route("/")
+.get(authMiddleware , profile.getProfile)
+.patch(authMiddleware, upload.single("image") , profile.updateProfile)
+ 
+export default profileRouter;

@@ -19,16 +19,20 @@ model Users {
   email    String  @unique
   password String?
   image    String  @default("https://i.pinimg.com/736x/5e/39/6b/5e396bb1b17681759922dd10f8a9d702.jpg")
-  token    String  @db.Text 
+  token    String? @db.Text
   role     Role    @default(user)
 }
 
 model Book {
-  id          String  @id @default(uuid())
+  id          String   @id @default(uuid())
   title       String
   description String?
   cover       String?
-  status      status  @default(Tersedia)
+  halaman     Int?
+  stok        Int
+  status      status   @default(Tersedia)
+  created_at  DateTime @default(now())
+  update_at   DateTime @updatedAt
 }
 
 enum status {

@@ -10,6 +10,6 @@ userRouter.route("/login")
 .post(Login)
 
 userRouter.route("/logout")
-.post(Logout)
+.delete(Logout)
 
 export default userRouter;

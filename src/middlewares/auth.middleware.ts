@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { checkToken } from "../modules/auth/auth.services";
+import { checkToken, deleteToken } from "../modules/auth/auth.services";
 import jwt from "jsonwebtoken";
+
 
 export const authMiddleware = async (
   req: Request,
@@ -18,7 +19,6 @@ export const authMiddleware = async (
   const token = headers.authorization?.split(" ")[1];
 
   try {
-    
     const decoded = jwt.verify(token!, process.env.JWT_SECRET!) as {
       id: string;
       email: string;
@@ -27,7 +27,7 @@ export const authMiddleware = async (
       token: string;
     };
 
-    const tokenExist = await checkToken({id : decoded.id});
+    const tokenExist = await checkToken({ id: decoded.id });
 
     if (!tokenExist.token) {
       res.status(401).json({
@@ -38,9 +38,11 @@ export const authMiddleware = async (
 
     (req as any).user = tokenExist;
     next();
-    
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
+      const decoded = jwt.decode(token!) as any;
+      const tokenExist = await checkToken({ id: decoded.id });
+      await deleteToken({ email: tokenExist.email });
       res.status(401).json({
         message: "Token Expired",
         status_code: 401,
@@ -52,6 +54,7 @@ export const authMiddleware = async (
         status_code: 401,
       });
     }
+    
     if (error instanceof jwt.NotBeforeError) {
       res.status(401).json({
         message: "Token Not Active",
