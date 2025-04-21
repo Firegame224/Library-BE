@@ -159,12 +159,3 @@ export function BookController() {
     searchBook: async () => {},
   };
 }
-
-const Borrow = () => {
-  return {
-    borrowBook: async () => {},
-    returnBook: async () => {},
-    getBorrowedBook: async () => {},
-    getHistoryBook: async () => {},
-  };
-};

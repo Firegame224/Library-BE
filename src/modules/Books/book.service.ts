@@ -38,48 +38,48 @@ export async function BookService() {
         },
       });
     },
-    updateBook: async function (data: {id : string ,title : string , stok : number , image : any , description : string | undefined , halaman : number | undefined}) {
-        const bookExist = await prisma.book.findUnique({
-          where : {
-            id : data.id
-          }
-        })
+    updateBook: async function (data: {
+      id: string;
+      title: string;
+      stok: number;
+      image: any;
+      description: string | undefined;
+      halaman: number | undefined;
+    }) {
+      const bookExist = await prisma.book.findUnique({
+        where: {
+          id: data.id,
+        },
+      });
 
-        if (!bookExist) {
-            throw new Error("Buku Tidak Ditemukan");
-        }
+      if (!bookExist) {
+        throw new Error("Buku Tidak Ditemukan");
+      }
 
-        return await prisma.book.update({
-            where : {
-                id : data.id
-            }, data : {
-                title : data.title,
-                stok : data.stok,
-                cover : data.image,
-                description : data.description,
-                halaman : data.halaman
-            }
-        })
+      return await prisma.book.update({
+        where: {
+          id: data.id,
+        },
+        data: {
+          title: data.title,
+          stok: data.stok,
+          cover: data.image,
+          description: data.description,
+          halaman: data.halaman,
+        },
+      });
     },
     deleteBook: async function () {
-      return await prisma.book.deleteMany();  // Ini method darurat ketika data buku terlalu banyak
+      return await prisma.book.deleteMany(); // Ini method darurat ketika data buku terlalu banyak
     },
 
     deleteBookById: async function (data: { id: string }) {
-        return await prisma.book.delete({
-            where : {
-                id : data.id
-            }
-        })
-    }
-    }
+      return await prisma.book.delete({
+        where: {
+          id: data.id,
+        },
+      });
+    },
+  };
 }
 
-export async function BorrowService() {
-  return {
-    borrowBook: async function () {},
-    returnBook: async function () {},
-    getBorrowedBook: async function () {},
-    getHistoryBook: async function () {},
-  }
-}

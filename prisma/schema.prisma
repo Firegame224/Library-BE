@@ -6,6 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output = "/node_modules/prisma/prisma-client"
 }
 
 datasource db {
@@ -13,34 +14,58 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Users {
-  id       String  @id @default(uuid())
-  name     String? @unique
-  email    String  @unique
-  password String?
-  image    String  @default("https://i.pinimg.com/736x/5e/39/6b/5e396bb1b17681759922dd10f8a9d702.jpg")
-  token    String? @db.Text
-  role     Role    @default(user)
-}
-
-model Book {
-  id          String   @id @default(uuid())
-  title       String
-  description String?
-  cover       String?
-  halaman     Int?
-  stok        Int
-  status      status   @default(Tersedia)
-  created_at  DateTime @default(now())
-  update_at   DateTime @updatedAt
-}
-
 enum status {
-  Dipinjam
   Tersedia
+  Dipinjam
 }
 
 enum Role {
   admin
   user
+}
+
+enum borrowStatus {
+  Dipinjam
+  Dikembalikan
+  Terlambat
+}
+
+model Users {
+  id       String     @id @default(uuid())
+  name     String?    @unique
+  email    String     @unique
+  password String?
+  image    String     @default("https://i.pinimg.com/736x/5e/39/6b/5e396bb1b17681759922dd10f8a9d702.jpg")
+  borrow   borrowed[] @relation("User to Borrowed")
+  token    String?    @db.Text
+  role     Role       @default(user)
+}
+
+model Book {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  cover       String?
+  halaman     Int?
+  stok        Int
+  status      status     @default(Tersedia)
+  borrowed    borrowed[] @relation("Book to Borrowed")
+  created_at  DateTime   @default(now())
+  update_at   DateTime   @updatedAt
+}
+
+model borrowed {
+  id String @id @default(uuid())
+
+  user    Users  @relation("User to Borrowed", references: [id], fields: [user_Id]) // Relation User
+  user_Id String
+
+  book    Book   @relation("Book to Borrowed", references: [id], fields: [book_Id]) // Relation Book
+  book_Id String
+
+  status    borrowStatus @default(Dipinjam)
+  borrow_At DateTime     @default(now())
+  return_At DateTime?
+
+  @@unique([user_Id,book_Id])
 }
