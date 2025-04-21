@@ -65,7 +65,7 @@ export const BorrowController = () => {
         res.status(200).json({
           message: "Berhasil mengembalikan buku",
           status_code: 200,
-          data: returnBook.updateStatus,
+          data: returnBook.borrowedBook,
         });
       } catch (error) {
         res.status(500).json({

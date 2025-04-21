@@ -65,7 +65,7 @@ model borrowed {
 
   status    borrowStatus @default(Dipinjam)
   borrow_At DateTime     @default(now())
-  return_At DateTime?
+  return_At DateTime
 
   @@unique([user_Id,book_Id])
 }

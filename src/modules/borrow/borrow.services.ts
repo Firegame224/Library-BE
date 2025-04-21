@@ -3,6 +3,7 @@ export async function BorrowService() {
     borrowBook: async function (data: { book_Id: string; user_Id: string }) {
       try {
         let borrowBook;
+
         const userExist = await prisma.users.findUnique({
           where: {
             id: data.user_Id,
@@ -34,6 +35,10 @@ export async function BorrowService() {
         if (existBorrow?.status === "Dipinjam") {
           throw new Error("Buku sudah dipinjam");
         } else if (existBorrow) {
+          const return_At = new Date(existBorrow.borrow_At);
+
+          return_At.setDate(return_At.getDate() + 7);
+
           borrowBook = await prisma.borrowed.update({
             where: {
               user_Id_book_Id: {
@@ -43,17 +48,18 @@ export async function BorrowService() {
             },
             data: {
               borrow_At: new Date(),
+              return_At,
               status: "Dipinjam",
             },
-          })
+          });
 
           return { borrowBook };
-
         } else {
           borrowBook = await prisma.borrowed.create({
             data: {
               book_Id: data.book_Id,
               user_Id: data.user_Id,
+              return_At: new Date(new Date().setDate(new Date().getDate() + 7)),
             },
           });
         }
@@ -96,9 +102,8 @@ export async function BorrowService() {
         if (!borrowedBook) {
           throw new Error("Tidak ada buku terpinjam");
         }
-        const return_At = new Date(borrowedBook.borrow_At);
 
-        return_At.setDate(return_At.getDate() + 7);
+        const return_At = new Date(borrowedBook.return_At as any);
 
         const updateReturn = await prisma.borrowed.update({
           where: {
@@ -151,7 +156,7 @@ export async function BorrowService() {
             status: "Dipinjam",
           },
         });
-        
+
         if (borrowedBook.length === 0) {
           return [];
         }
