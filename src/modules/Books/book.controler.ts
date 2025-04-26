@@ -8,24 +8,27 @@ export function BookController() {
       try {
         const { page, limit } = req.query;
         const Books = await BookService();
-        const getAllbook = await Books.getAllbook({
-          limit: Number(limit),
-          page: Number(page),
+
+        const getAllbookPagination = await Books.getAllbookPagination({
+          limit: Number(limit) || 100,
+          page: Number(page) || 1,
         });
-        if (getAllbook.length === 0) {
+
+        if (getAllbookPagination.length === 0) {
           res.status(404).json({
             message: "Data buku tidak ditemukan",
             status_code: 404,
           });
           return;
         }
+
         res.status(200).json({
           message: "Berhasil mendapatkan semua data buku",
           status_code: 200,
-          data: getAllbook,
+          data: getAllbookPagination,
           pagination: {
+            page: Number(page),
             limit: Number(limit),
-            Page: Number(page),
           },
         });
       } catch (error) {

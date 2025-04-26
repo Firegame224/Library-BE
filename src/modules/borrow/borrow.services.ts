@@ -24,6 +24,9 @@ export async function BorrowService() {
           throw new Error("Buku Tidak Ditemukan");
         }
 
+        if (bookExist.stok === 0) {
+          throw new Error("Stok buku habis");
+        }
         const existBorrow = await prisma.borrowed.findUnique({
           where: {
             user_Id_book_Id: {
@@ -52,8 +55,7 @@ export async function BorrowService() {
               status: "Dipinjam",
             },
           });
-
-          return { borrowBook };
+          
         } else {
           borrowBook = await prisma.borrowed.create({
             data: {
@@ -66,26 +68,18 @@ export async function BorrowService() {
 
         const updateStok = await prisma.book.update({
           where: {
-            id: borrowBook.book_Id,
+            id: bookExist.id,
           },
           data: {
             stok: {
               decrement: 1,
-            },
-          },
-        });
-        const updateStatus = await prisma.book.update({
-          where: {
-            id: borrowBook.book_Id,
-          },
-          data: {
-            status: updateStok.stok === 0 ? "Dipinjam" : "Tersedia",
+            },status : bookExist.stok - 1 === 0 ? "Dipinjam" : "Tersedia"
           },
         });
 
-        return { updateStatus, borrowBook, updateStok };
+        return { borrowBook, updateStok };
       } catch (error: any) {
-        throw new Error(error.message);
+        throw error;
       }
     },
     returnBook: async function (data: { book_Id: string; user_Id: string }) {
@@ -103,7 +97,7 @@ export async function BorrowService() {
           throw new Error("Tidak ada buku terpinjam");
         }
 
-        const return_At = new Date(borrowedBook.return_At as any);
+        const return_At = new Date();
 
         const updateReturn = await prisma.borrowed.update({
           where: {
@@ -155,6 +149,10 @@ export async function BorrowService() {
             user_Id: data.user_Id,
             status: "Dipinjam",
           },
+          include : {
+            book : true,
+            user : true
+          }
         });
 
         if (borrowedBook.length === 0) {
@@ -171,7 +169,10 @@ export async function BorrowService() {
           where: {
             user_Id: data.user_Id,
             status: "Dikembalikan",
-          },
+          },include :{
+            book : true,
+            user : true
+          }
         });
         if (returnedBook.length === 0) {
           return [];
@@ -188,7 +189,10 @@ export async function BorrowService() {
           where: {
             user_Id: data.user_Id,
             status: "Terlambat",
-          },
+          },include :{
+            book : true,
+            user : true
+          }
         });
         if (lateBook.length === 0) {
           return [];

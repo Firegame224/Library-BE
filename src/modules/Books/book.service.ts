@@ -1,6 +1,14 @@
 export async function BookService() {
   return {
-    getAllbook: async function (data: { limit: number; page: number }) {
+    getAllbook: async function () {
+      const Allbook = await prisma.book.findMany();
+      if (!Allbook) {
+        throw new Error("Data buku tidak ditemukan");
+      }
+
+      return Allbook;
+    },
+    getAllbookPagination: async function (data: { limit: number; page: number }) {
       return await prisma.book.findMany({
         skip: data.limit * (data.page - 1),
         take: data.limit,
